@@ -1,4 +1,5 @@
-﻿using BDArmory;
+﻿using System;
+using System.Reflection;
 
 namespace WetWeaponCheck
 {
@@ -9,8 +10,19 @@ namespace WetWeaponCheck
         public float CutoffDepth = -5;
 
         private float cutOffDepth = 0.0f;
-        ModuleTurret turret;
-        ModuleWeapon weapon;
+        Type moduleTurret;
+        Type moduleWeapon;
+        FieldInfo maxPitch;
+        FieldInfo yawRange;
+        FieldInfo pitchSpeedDPS;
+        FieldInfo engageGround;
+        FieldInfo engageAir;
+        FieldInfo engageMissile;
+        FieldInfo engageSLW;
+        FieldInfo engageRangeMin;
+
+        PartModule turret;
+        PartModule weapon;
 
         public override void OnStart(StartState state)
         {
@@ -18,6 +30,7 @@ namespace WetWeaponCheck
             {
                 weapon = weaponCheck();
                 turret = turretCheck();
+                getFields();
             }
             base.OnStart(state);
         }
@@ -36,34 +49,70 @@ namespace WetWeaponCheck
             base.OnUpdate();
         }
 
-        private ModuleWeapon weaponCheck()
+        private PartModule weaponCheck()
         {
-            ModuleWeapon weapon = null;
+            PartModule weapon = null;
 
-            weapon = part.FindModuleImplementing<ModuleWeapon>();
+            using (var m = part.FindModulesImplementing<PartModule>().GetEnumerator())
+                while (m.MoveNext())
+                {
+                    if (m.Current.moduleName == "ModuleWeapon")
+                        weapon = m.Current;
+                }
 
             return weapon;
         }
 
-        private ModuleTurret turretCheck()
+        private void getFields()
         {
-            ModuleTurret turret = null;
+            if (turret != null)
+            {
+                moduleTurret = turret.GetType();
+                maxPitch = moduleTurret.GetField(nameof(maxPitch));
+                yawRange = moduleTurret.GetField(nameof(yawRange));
+                pitchSpeedDPS = moduleTurret.GetField(nameof(pitchSpeedDPS));
+            }
+            if (weapon != null)
+            {
+                moduleWeapon = weapon.GetType();
+                engageGround = moduleWeapon.GetField(nameof(engageGround));
+                engageAir = moduleWeapon.GetField(nameof(engageAir));
+                engageMissile = moduleWeapon.GetField(nameof(engageMissile));
+                engageRangeMin = moduleWeapon.GetField(nameof(engageRangeMin));
+                engageSLW = moduleWeapon.GetField(nameof(engageSLW));
+            }
+        }
 
-            turret = part.FindModuleImplementing<ModuleTurret>();
+        private PartModule turretCheck()
+        {
+            PartModule weapon = null;
 
-            return turret;
+            using (var m = part.FindModulesImplementing<PartModule>().GetEnumerator())
+                while (m.MoveNext())
+                {
+                    if (m.Current.moduleName == "ModuleTurret")
+                        weapon = m.Current;
+                }
+
+            return weapon;
         }
 
         public void DisableWeapon()
         {
-            turret.maxPitch = 0;
-            turret.yawRange = 0;
-            turret.pitchSpeedDPS = 0;
-            weapon.engageGround = false;
-            weapon.engageAir = false;
-            weapon.engageMissile = false;
-            weapon.engageSLW = false;
-            weapon.engageRangeMin = 0;
+            if (turret != null)
+            {
+                maxPitch.SetValue(turret, 0);
+                yawRange.SetValue(turret, 0);
+                pitchSpeedDPS.SetValue(turret, 0);
+            }
+            if (weapon != null)
+            {
+                engageGround.SetValue(weapon, false);
+                engageAir.SetValue(weapon, false);
+                engageMissile.SetValue(weapon, false);
+                engageSLW.SetValue(weapon, false);
+                engageRangeMin.SetValue(weapon, 0);
+            }
         }
     }
 }

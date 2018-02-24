@@ -39,10 +39,6 @@
       <HintPath>..\..\..\KSP_DEV\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="BDArmory, Version=1.1.0.26521, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Dependencies\BDArmory.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\KSP_DEV\KSP_Data\Managed\UnityEngine.dll</HintPath>
