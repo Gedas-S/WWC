@@ -4,4 +4,5 @@ WWC_Plugin/obj
 WWC_Plugin/bin/Debug/
 WWC_Plugin/bin/Release
 /.vs
+.suo
 
